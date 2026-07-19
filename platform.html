@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Center Cooling Advisor | Danfoss</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #E2001A;
+    --dark: #FFFFFF;
+    --mid: #F4F4F4;
+    --card: #FFFFFF;
+    --border: #DDDDDD;
+    --text: #1A1A1A;
+    --muted: #666666;
+    --accent: #E2001A;
+    --green: #00A868;
+    --blue: #0080D6;
+    --yellow: #C98A00;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--mid);
+    border-bottom: 3px solid var(--red);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    height: 42px;
+    width: auto;
+    display: block;
+    margin-right: 4px;
+  }
+
+  .logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* LANG TOGGLE */
+  .lang-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .lang-btn {
+    padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active {
+    background: var(--red);
+    color: white;
+  }
+
+  /* MAIN LAYOUT */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--mid) 0%, #FFF5F5 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: 'CDU';
+    position: absolute;
+    right: -10px;
+    top: -20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 120px;
+    color: rgba(226,0,26,0.05);
+    pointer-events: none;
+    letter-spacing: -4px;
+  }
+
+  .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  .hero h1 span { color: var(--red); }
+
+  .hero p {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 14px;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* SECTION TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab-btn {
+    padding: 10px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon { font-size: 18px; }
+
+  /* FORM */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--red);
+  }
+
+  .unit-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover { background: #c5001a; }
+
+  /* RESULTS */
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) { .result-grid { grid-template-columns: 1fr 1fr; } }
+
+  .result-item {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  .result-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .result-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .result-unit {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* PRODUCT TABLE */
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .product-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--mid);
+  }
+
+  .product-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .product-table tr:last-child td { border-bottom: none; }
+  .product-table tr:hover td { background: rgba(226,0,26,0.04); }
+
+  .prod-name {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .prod-code {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--blue);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-valve { background: rgba(0,153,255,0.15); color: var(--blue); }
+  .tag-sensor { background: rgba(0,200,122,0.15); color: var(--green); }
+  .tag-drive { background: rgba(255,184,0,0.15); color: var(--yellow); }
+  .tag-controller { background: rgba(226,0,26,0.15); color: var(--red); }
+  .tag-pump { background: rgba(180,100,255,0.15); color: #B464FF; }
+
+  .qty-badge {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 28px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  /* ALERT BOX */
+  .alert {
+    border-left: 3px solid var(--yellow);
+    background: rgba(255,184,0,0.08);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--yellow);
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+
+  .alert.info { border-color: var(--blue); background: rgba(0,153,255,0.08); color: var(--blue); }
+  .alert.ok { border-color: var(--green); background: rgba(0,200,122,0.08); color: var(--green); }
+
+  /* FORMULA BOX */
+  .formula-box {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 14px 18px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--blue);
+  }
+
+  .formula-box span { color: var(--muted); font-size: 12px; font-family: 'Barlow', sans-serif; }
+
+  /* HIDDEN by LANG */
+  .en-text, .zh-text { }
+  body.lang-zh .en-text { display: none; }
+  body.lang-zh .zh-text { display: inline; }
+  body.lang-en .zh-text { display: none; }
+  body.lang-en .en-text { display: inline; }
+
+  .zh-text { display: none; }
+
+  /* SECTION DIVIDER */
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* HIDDEN RESULTS */
+  #results-panel { display: none; }
+  #results-panel.visible { display: block; }
+
+  /* SPEC TABLE */
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .spec-row:last-child { border-bottom: none; }
+  .spec-key { color: var(--muted); }
+  .spec-val { font-weight: 600; color: var(--text); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; }
+
+  /* SCROLL AREA */
+  .scroll-x { overflow-x: auto; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 48px;
+  }
+
+  .danfoss-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--red);
+  }
+
+  /* BLINK DOT */
+  .blink-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: blink 1.2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* MONITOR GRID */
+  .monitor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media(max-width:900px){ .monitor-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .sensor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sensor-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .sensor-card.temp::before  { background: #FF6B35; }
+  .sensor-card.flow::before  { background: var(--blue); }
+  .sensor-card.press::before { background: var(--yellow); }
+  .sensor-card.power::before { background: var(--green); }
+
+  .sensor-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sensor-id { color: var(--border); font-size: 10px; }
+
+  .sensor-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px; font-weight: 700; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .sensor-unit { font-size: 13px; color: var(--muted); }
+
+  .sensor-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin-top: 10px; overflow: hidden;
+  }
+  .sensor-bar-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .temp .sensor-bar-fill  { background: #FF6B35; }
+  .flow .sensor-bar-fill  { background: var(--blue); }
+  .press .sensor-bar-fill { background: var(--yellow); }
+  .power .sensor-bar-fill { background: var(--green); }
+
+  .status-ok    { color: var(--green); }
+  .status-warn  { color: var(--yellow); }
+  .status-alert { color: var(--accent); }
+
+  /* CHART AREA */
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--red);
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chart-live-badge {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    color: var(--green); border: 1px solid var(--green);
+    padding: 2px 8px; border-radius: 2px;
+  }
+  canvas { display: block; width: 100% !important; }
+
+  /* DT ARCHITECTURE */
+  .dt-arch {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  @media(max-width:900px){ .dt-arch { grid-template-columns: 1fr; } }
+
+  .dt-layer {
+    padding: 18px 14px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .dt-layer:last-child { border-right: none; }
+  .dt-layer-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .dt-layer-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 700; margin-bottom: 10px;
+  }
+  .dt-layer ul {
+    list-style: none; padding: 0; margin: 0;
+    font-size: 12px; color: var(--muted); line-height: 1.9;
+  }
+  .dt-layer ul li::before { content: '— '; color: var(--border); }
+
+  .dt-layer.l1 .dt-layer-title { color: #FF6B35; }
+  .dt-layer.l2 .dt-layer-title { color: var(--blue); }
+  .dt-layer.l3 .dt-layer-title { color: var(--yellow); }
+  .dt-layer.l4 .dt-layer-title { color: #B464FF; }
+  .dt-layer.l5 .dt-layer-title { color: var(--green); }
+
+  .dt-arrow {
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted); font-size: 14px; z-index: 2;
+  }
+
+  /* EVENT LOG */
+  .event-log {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .log-entry {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.4s ease;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+  .log-time { color: var(--muted); min-width: 60px; font-size: 12px; }
+  .log-ok   { color: var(--green); }
+  .log-warn { color: var(--yellow); }
+  .log-alert{ color: var(--accent); }
+
+  .grid-monitor-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:768px){ .grid-monitor-bottom { grid-template-columns: 1fr; } }
+
+
+  /* ── TOOLTIP ── */
+  .field-wrap { position: relative; }
+
+  .tip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    background: var(--border);
+    color: var(--muted);
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 6px;
+    vertical-align: middle;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.2s;
+    font-style: normal;
+  }
+  .tip-icon:hover { background: var(--red); color: white; }
+
+  .tooltip-box {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: calc(100% + 6px);
+    z-index: 200;
+    background: #FFFFFF;
+    border: 1px solid var(--red);
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+    padding: 10px 14px;
+    width: 280px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    pointer-events: none;
+  }
+
+  .tooltip-box .tt-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .tooltip-box .tt-body {
+    color: #ccc;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .tooltip-box .tt-formula {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--blue);
+    background: var(--mid);
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .tooltip-box .tt-range {
+    color: var(--green);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .field-wrap:hover .tooltip-box,
+  .tip-icon:focus + .tooltip-box { display: block; }
+
+</style>
+</head>
+<body class="lang-en">
+
+<header>
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 126 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_danfoss)">
+<path d="M22.4784 55C14.6102 55 10.6761 55 7.67091 53.4686C5.0274 52.1214 2.87818 49.9719 1.53129 47.3281C0 44.3224 0 40.3878 0 32.5185V22.4815C0 14.6122 0 10.6776 1.53123 7.67195C2.87818 5.02808 5.0274 2.87857 7.67085 1.5315C10.6761 0 14.6102 0 22.4784 0H103.522C111.39 0 115.324 0 118.329 1.53144C120.973 2.87857 123.122 5.02809 124.469 7.67189C126 10.6775 126 14.6122 126 22.4814V32.5185C126 40.3877 126 44.3223 124.469 47.328C123.122 49.9719 120.973 52.1214 118.329 53.4684C115.324 54.9999 111.39 54.9999 103.522 54.9999L22.4784 55Z" fill="#ED071B"/>
+<path d="M16.6986 25.6797L20.6497 18.2737C26.0242 16.2586 31.943 14.7931 38.0554 14.7931C39.8085 14.7931 41.5773 14.9135 43.3514 15.1752L44.1625 13.6782C45.8162 13.4218 47.4647 13.2072 49.1184 13.024L46.9047 16.4156C49.0556 17.3577 51.0442 19.6973 51.0442 22.1886C51.0442 25.2557 49.6103 27.9616 47.9357 30.4792L50.3377 30.1913C51.5571 28.2181 54.4301 25.9204 56.5705 25.9204C57.2822 25.9204 57.9259 26.1769 58.3969 26.7788L59.0301 25.8733L62.0602 25.4179C59.6738 29.8354 58.287 31.3532 58.287 31.9551C58.287 32.0651 58.3288 32.1698 58.4544 32.1698C59.297 32.1698 63.6772 28.171 65.399 24.8684L68.272 24.5544L66.6655 27.4121L68.6384 25.7058C69.6798 24.8056 70.6114 24.0048 71.4957 24.0048C72.0557 24.0048 72.8145 24.2508 72.8145 25.0829C72.8145 26.7683 70.0514 29.94 70.0514 30.5838C70.0514 30.678 70.1089 30.7041 70.1717 30.7041C70.8834 30.7041 74.5886 27.9354 76.394 25.13L73.6937 25.5592L74.6409 23.8058L77.3151 23.4604C80.0102 18.4882 86.8238 9.26075 89.6236 9.26075C90.2411 9.26075 90.6597 9.72656 90.6597 10.4332C90.6597 12.8774 86.0702 18.3312 80.3189 22.445L79.8897 23.1987L85.7196 22.5497C85.8504 22.5393 85.9289 22.6178 85.9289 22.7172C85.9289 22.78 85.8975 22.8481 85.8295 22.9057C84.3014 24.1932 81.5435 27.0876 81.5435 28.731C81.5435 29.4062 82.0616 29.7987 82.6006 29.7987C84.2595 29.7987 86.604 26.2397 86.8186 25.5069C86.3476 25.3604 86.1435 24.8474 86.1435 24.2246C86.1435 22.9528 87.007 21.2308 88.2839 21.2308C88.7862 21.2308 89.4561 21.4663 89.4561 22.3614C89.4561 23.1778 88.9694 24.2246 88.713 24.7323C90.7592 24.4811 92.9623 22.7487 94.0508 21.5134C94.0508 19.4983 95.1864 17.3158 96.6099 17.3158C97.1594 17.3158 97.6251 17.5304 97.6251 18.1637C97.6251 18.9802 96.657 20.3829 95.4429 21.6496C95.4533 22.0212 95.4691 23.204 95.4481 23.6228C97.3635 22.958 99.4882 22.084 101.288 21.1733C101.315 19.1897 102.215 16.8239 103.753 16.8239C104.324 16.8239 104.789 17.0386 104.789 17.7242C104.789 18.7344 103.769 20.383 102.56 21.3513C102.607 22.1521 102.686 24.8633 102.686 25.4337C102.686 28.2077 100.823 30.3013 98.0491 30.3013C96.9763 30.3013 95.8826 29.7412 95.8826 28.6212C95.8826 26.2816 98.9702 24.6224 101.163 23.6646C101.194 23.2355 101.236 22.5341 101.236 22.1782C100.509 22.6179 97.531 23.7903 95.4848 24.5492C95.4011 28.3752 93.3392 30.7305 90.6179 30.7305C89.3777 30.7305 88.5246 30.2699 88.5246 29.0399C88.5246 26.5539 91.6122 25.1826 93.8573 24.2143C93.9619 23.8008 94.0247 23.0733 94.0038 22.8116C92.3396 24.2457 90.4138 25.7164 87.9646 25.774C86.7296 28.2234 83.8252 31.4423 81.2661 31.4423C80.0363 31.4423 78.8327 30.6782 78.8327 29.3592C78.8327 27.2709 81.4859 24.4812 81.8261 24.2143C80.9103 24.3033 79.9997 24.4498 79.0839 24.6644L74.3112 33.5097C85.5678 32.3478 96.8245 31.6255 105.632 31.6098L103.847 33.2742C104.69 33.8762 105.59 34.4624 106.495 34.97C97.8711 34.499 85.3376 34.9334 73.0919 35.7708L70.4752 40.6227L67.2359 40.8582L70.0252 35.9906C60.2339 36.7234 50.8559 37.6917 44.0841 38.6495L44.6179 37.7179C52.3265 36.2366 61.7148 34.8863 71.2603 33.8343L73.6466 29.6681C72.3697 30.7306 69.863 32.7666 68.1831 32.7666C67.5184 32.7666 66.9795 32.4578 66.9795 31.7513C66.9795 30.2125 69.4025 27.2501 69.4025 26.6587C69.4025 26.6011 69.3868 26.5645 69.3292 26.5645C68.7641 26.5645 64.6455 30.8354 63.1122 33.1959C62.2644 33.2587 61.4166 33.3477 60.5688 33.4628L61.8667 30.9558C60.4903 32.2276 58.1563 34.0438 56.7591 34.0438C56.3038 34.0438 55.7177 33.8135 55.4194 32.9866C54.3675 33.9287 52.63 35.0278 51.1072 35.0278C50.1967 35.0278 49.3332 34.6352 49.3332 33.1698C49.3332 32.4684 49.532 31.7513 49.6419 31.4897L47.0881 31.767C38.9871 41.1462 29.0911 44.4593 23.6747 44.4593C21.6704 44.4593 19.5143 44.0354 19.5143 42.1774C19.5143 39.3197 25.5796 35.8757 33.6282 33.3687L41.3472 18.8759C40.353 18.7241 39.3324 18.6561 38.3068 18.6561C30.7552 18.6561 21.5396 22.6601 16.6988 25.6801L16.6986 25.6797ZM24.6531 40.8842C24.6531 41.8107 25.8777 41.9833 26.8877 41.9833C30.6609 41.9833 38.5682 39.3821 44.3143 32.2587C39.259 33.0595 36.2446 34.1324 35.1457 34.5302L32.1732 39.0942C31.9325 39.4606 31.6342 39.8165 31.1527 39.8165C30.509 39.8165 30.4829 39.3036 30.7445 38.8116L32.5291 35.441C28.8711 36.5872 24.6531 39.2408 24.6531 40.8842ZM44.8115 19.6817L36.5273 32.4472C39.3689 31.683 43.791 30.9712 45.3139 30.809C46.0936 29.5528 47.9201 26.5224 47.9201 23.8478C47.9201 22.1102 47.1507 20.5243 44.8115 19.6817ZM53.6713 29.5528C53.0328 30.4112 52.3525 31.704 52.3525 32.5204C52.3525 32.9287 52.5462 33.2479 52.9491 33.2479C53.8021 33.2479 55.325 31.8923 55.8902 31.1648C56.738 30.0709 57.4549 28.663 57.4549 27.8831C57.4549 27.4173 57.1933 27.2551 56.7798 27.2551C55.6966 27.2551 54.1998 28.8409 53.6713 29.5528ZM81.5801 20.0114C83.2233 19.0065 86.7819 15.6202 87.8233 13.469C88.017 13.066 88.1216 12.7048 88.1216 12.4275C88.1216 12.1292 87.9907 11.8779 87.6924 11.8779C87.2424 11.8779 86.4888 12.4065 85.6515 13.4062C84.2123 15.1229 82.2865 18.3575 81.5801 20.0114ZM93.5327 25.35C92.7686 25.5594 90.3352 26.9673 90.3352 28.0036C90.3352 28.2443 90.4921 28.4694 90.8062 28.4694C92.0307 28.4694 93.271 26.5643 93.5327 25.35ZM100.87 24.9888C99.7498 25.2452 97.4995 26.6584 97.4995 27.7157C97.4995 27.9355 97.6408 28.1711 97.9914 28.1711C99.3416 28.1711 100.498 26.4543 100.87 24.9888Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_danfoss">
+<rect width="126" height="55" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+    <div>
+      <div class="logo-text">Danfoss Data Center Advisor</div>
+      <div class="logo-sub">
+        <span class="en-text">Data Center Cooling &amp; CDU Calculator</span>
+        <span class="zh-text">資料中心散熱 &amp; CDU 計算工具</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>
+      <span class="en-text">Server &amp; CDU <span>Cooling</span> Advisor</span>
+      <span class="zh-text">伺服器 &amp; CDU <span>散熱</span>顧問工具</span>
+    </h1>
+    <p>
+      <span class="en-text">Calculate heat load, water flow rate, delta-T, and get a recommended Danfoss product list for your data center cooling infrastructure.</span>
+      <span class="zh-text">計算熱負載、水流量、溫差，並獲取針對您資料中心冷卻基礎設施的 Danfoss 建議產品清單。</span>
+    </p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('cdu')">
+      <span class="en-text">CDU Calculator</span>
+      <span class="zh-text">CDU 計算</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('server')">
+      <span class="en-text">Server Rack Heat Load</span>
+      <span class="zh-text">機架熱負載</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('products')">
+      <span class="en-text">Product Reference</span>
+      <span class="zh-text">產品參考</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('monitor')">
+      <span class="blink-dot"></span>
+      <span class="en-text">Real-time Monitor</span>
+      <span class="zh-text">即時監控</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════ TAB 1: CDU CALCULATOR ═══════════════ -->
+  <div id="tab-cdu" class="tab-panel active">
+    <div class="grid-2">
+
+      <!-- INPUTS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⚙️</span>
+          <span class="en-text">System Parameters</span>
+          <span class="zh-text">系統參數設定</span>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">IT Load</span><span class="zh-text">IT 熱負載</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Total IT Power per CDU</span>
+            <span class="zh-text">每台 CDU 的 IT 總功率</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">IT Power per CDU</div>
+            <div class="tt-title zh-text">每台 CDU 的 IT 功率</div>
+            <div class="tt-body en-text">Total IT equipment power load handled by one CDU unit. For high-density GPU racks (e.g. NVIDIA H100), this can exceed 100 kW per rack.</div>
+            <div class="tt-body zh-text">每台 CDU 處理的 IT 設備總功率。高密度 GPU 機架（如 NVIDIA H100）每架可超過 100 kW。</div>
+          <div class="tt-formula">Q = IT Power × PUE</div>
+          <div class="tt-range">✔ Typical range: 50–500 kW</div>
+          </div>
+          <input type="number" id="it_power" value="100" min="1" max="2000" step="1">
+          <div class="unit-hint">kW</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Number of CDU Units</span>
+            <span class="zh-text">CDU 台數</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Number of CDU Units</div>
+            <div class="tt-title zh-text">CDU 台數</div>
+            <div class="tt-body en-text">Total number of Cooling Distribution Units in the system. Each CDU serves a set of server racks via a liquid cooling loop.</div>
+            <div class="tt-body zh-text">系統中的冷卻分配單元總台數。每台 CDU 透過液冷迴路服務一組伺服器機架。</div>
+          <div class="tt-formula">Total Heat = IT Power × CDU Count × PUE</div>
+          <div class="tt-range">✔ Typical: 1–20 units per zone</div>
+          </div>
+          <input type="number" id="cdu_count" value="2" min="1" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">CDU Efficiency (PUE factor)</span>
+            <span class="zh-text">CDU 效率 (PUE 因子)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">PUE — Power Usage Effectiveness</div>
+            <div class="tt-title zh-text">PUE — 電源使用效率</div>
+            <div class="tt-body en-text">Ratio of total facility power to IT equipment power. PUE = 1.0 is ideal (100% efficient). Liquid cooling achieves PUE 1.03–1.15 vs air cooling 1.4–2.0.</div>
+            <div class="tt-body zh-text">總設施功率與 IT 設備功率的比值。PUE = 1.0 為理想值。液冷可達 1.03–1.15，遠優於風冷的 1.4–2.0。</div>
+          <div class="tt-formula">PUE = Total Facility Power / IT Power</div>
+          <div class="tt-range">✔ Liquid cooling target: 1.03–1.15</div>
+          </div>
+          <input type="number" id="pue" value="1.1" min="1.0" max="2.0" step="0.01">
+          <div class="unit-hint">
+            <span class="en-text">Typical: 1.05–1.15 for liquid cooling</span>
+            <span class="zh-text">液冷典型值：1.05–1.15</span>
+          </div>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">Water Circuit</span><span class="zh-text">水路參數</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Supply Water Temp (Tw,in)</span>
+            <span class="zh-text">供水溫度 (Tw,in)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Supply Water Temperature (Tw,in)</div>
+            <div class="tt-title zh-text">供水溫度 (Tw,in)</div>
+            <div class="tt-body en-text">Inlet water temperature to the CDU from the facility chilled water system. Lower supply temp increases cooling capacity but raises chiller energy cost.</div>
+            <div class="tt-body zh-text">CDU 從設施冰水系統接收的進水溫度。供水溫度越低冷卻能力越強，但冷機能耗越高。</div>
+          <div class="tt-formula">ΔT = Tw,out − Tw,in</div>
+          <div class="tt-range">✔ ASHRAE W1: 20°C | W2: 25°C | W3: 35°C</div>
+          </div>
+          <input type="number" id="temp_in" value="20" min="5" max="40" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Return Water Temp (Tw,out)</span>
+            <span class="zh-text">回水溫度 (Tw,out)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Return Water Temperature (Tw,out)</div>
+            <div class="tt-title zh-text">回水溫度 (Tw,out)</div>
+            <div class="tt-body en-text">Outlet water temperature leaving the CDU back to the facility. Higher return temp means better energy efficiency. ΔT = Tw,out − Tw,in drives flow calculation.</div>
+            <div class="tt-body zh-text">從 CDU 回到設施的出水溫度。回水溫度越高代表能源效率越好。ΔT = 回水 − 供水，是流量計算的關鍵。</div>
+          <div class="tt-formula">ṁ = Q / (Cp × ΔT)</div>
+          <div class="tt-range">✔ Typical ΔT: 10–20°C</div>
+          </div>
+          <input type="number" id="temp_out" value="35" min="10" max="60" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Coolant Type</span>
+            <span class="zh-text">冷卻液類型</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Coolant Type</div>
+            <div class="tt-title zh-text">冷卻液類型</div>
+            <div class="tt-body en-text">Pure water has best heat capacity (Cp = 4.182 kJ/kg·K). Glycol mixtures reduce freeze risk but lower Cp, requiring higher flow rates for same cooling.</div>
+            <div class="tt-body zh-text">純水比熱容最佳 (Cp = 4.182 kJ/kg·K)。乙二醇混合液防凍但 Cp 較低，相同冷卻量需要更大流量。</div>
+          <div class="tt-formula">Q = ṁ × Cp × ΔT</div>
+          <div class="tt-range">✔ Data center: usually pure water or ≤25% glycol</div>
+          </div>
+          <select id="coolant_type">
+            <option value="water">Water (純水)</option>
+            <option value="glycol25">25% Glycol</option>
+            <option value="glycol40">40% Glycol</option>
+          </select>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">Facility Side</span><span class="zh-text">設施側參數</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Chilled Water Supply Temp</span>
+            <span class="zh-text">冰水供應溫度</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Chilled Water Supply Temp (Facility side)</div>
+            <div class="tt-title zh-text">冰水供應溫度（設施側）</div>
+            <div class="tt-body en-text">Chilled water temperature supplied from the chiller plant to the CDU. Typical data center chiller supply: 7–15°C. Higher temp allows free cooling.</div>
+            <div class="tt-body zh-text">冷水機組提供給 CDU 的冰水溫度。資料中心冷機典型供水：7–15°C。溫度越高越有機會使用自由冷卻。</div>
+          <div class="tt-range">✔ Typical: 7–15°C | Free cooling: 18–24°C</div>
+          </div>
+          <input type="number" id="chw_in" value="12" min="4" max="25" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Chilled Water Return Temp</span>
+            <span class="zh-text">冰水回水溫度</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Chilled Water Return Temp (Facility side)</div>
+            <div class="tt-title zh-text">冰水回水溫度（設施側）</div>
+            <div class="tt-body en-text">Return temperature of chilled water back to the chiller. ΔT = CHW,out − CHW,in determines facility-side flow rate. Larger ΔT = smaller pipe & pump size.</div>
+            <div class="tt-body zh-text">冰水回到冷機的溫度。ΔT = 回水 − 供水，決定設施側流量。ΔT 越大，管道與水泵尺寸越小。</div>
+          <div class="tt-formula">CHW Flow = Q / (Cp × ΔT_chw)</div>
+          <div class="tt-range">✔ Typical ΔT: 5–8°C</div>
+          </div>
+          <input type="number" id="chw_out" value="18" min="6" max="30" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="calculate()">
+          <span class="en-text">▶ CALCULATE</span>
+          <span class="zh-text">▶ 計算</span>
+        </button>
+      </div>
+
+      <!-- RESULTS RIGHT -->
+      <div>
+        <!-- FORMULAS -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title"><span class="icon">📐</span>
+            <span class="en-text">Engineering Formulas</span>
+            <span class="zh-text">工程計算公式</span>
+          </div>
+          <div class="formula-box">
+            Q = ṁ × Cp × ΔT <span><br>
+            <span class="en-text">Heat Load = Mass Flow × Specific Heat × ΔT</span>
+            <span class="zh-text">熱負載 = 質量流量 × 比熱容 × 溫差</span>
+            </span>
+          </div>
+          <div class="formula-box" style="border-color:var(--green);">
+            ṁ = Q / (Cp × ΔT) <span><br>
+            <span class="en-text">Mass Flow [kg/s] from known Q &amp; ΔT</span>
+            <span class="zh-text">由已知 Q 與 ΔT 求質量流量 [kg/s]</span>
+            </span>
+          </div>
+          <div class="formula-box" style="border-color:var(--yellow);">
+            V̇ = ṁ / ρ <span><br>
+            <span class="en-text">Volume Flow [m³/h] from mass flow &amp; density</span>
+            <span class="zh-text">由質量流量與密度求體積流量 [m³/h]</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- RESULTS PANEL -->
+        <div id="results-panel" class="card">
+          <div class="card-title"><span class="icon">📊</span>
+            <span class="en-text">Calculation Results</span>
+            <span class="zh-text">計算結果</span>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total Heat Load</span><span class="zh-text">總熱負載</span></div>
+              <div class="result-value" id="r-heat">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Server ΔT</span><span class="zh-text">伺服器側溫差</span></div>
+              <div class="result-value" id="r-dt">—</div>
+              <div class="result-unit">°C</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Mass Flow</span><span class="zh-text">質量流量</span></div>
+              <div class="result-value" id="r-mass">—</div>
+              <div class="result-unit">kg/s</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Volume Flow</span><span class="zh-text">體積流量</span></div>
+              <div class="result-value" id="r-vol">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Flow (L/min)</span><span class="zh-text">流量 (L/min)</span></div>
+              <div class="result-value" id="r-lpm">—</div>
+              <div class="result-unit">L/min</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">CHW Flow</span><span class="zh-text">冰水流量</span></div>
+              <div class="result-value" id="r-chw">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+          </div>
+
+          <div id="alert-box" class="alert" style="display:none;"></div>
+
+          <div class="section-label">
+            <span class="en-text">Recommended Danfoss Products</span>
+            <span class="zh-text">建議 Danfoss 產品</span>
+          </div>
+
+          <div class="scroll-x">
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+                  <th><span class="en-text">Type</span><span class="zh-text">類型</span></th>
+                  <th><span class="en-text">Function</span><span class="zh-text">功能</span></th>
+                  <th><span class="en-text">Qty</span><span class="zh-text">數量</span></th>
+                </tr>
+              </thead>
+              <tbody id="product-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 2: SERVER RACK ═══════════════ -->
+  <div id="tab-server" class="tab-panel">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🖥️</span>
+          <span class="en-text">Rack Heat Load Calculator</span>
+          <span class="zh-text">機架熱負載計算</span>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Number of Racks</span><span class="zh-text">機架數量</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Number of Racks</div>
+            <div class="tt-title zh-text">機架數量</div>
+            <div class="tt-body en-text">Total server racks in the data hall. Used to calculate total IT load and required number of CDUs. Modern hyperscale DC: 1,000–10,000+ racks.</div>
+            <div class="tt-body zh-text">資料機房的伺服器機架總數。用於計算 IT 總負載與所需 CDU 台數。現代超大規模 DC：1,000–10,000+ 架。</div>
+          <div class="tt-formula">Total Load = Racks × Power/Rack</div>
+          <div class="tt-range">✔ Typical hall: 100–500 racks</div>
+          </div>
+          <input type="number" id="rack_count" value="10" min="1" max="1000">
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Power per Rack</span><span class="zh-text">每架功率</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Power per Rack</div>
+            <div class="tt-title zh-text">每架功率</div>
+            <div class="tt-body en-text">Average IT power load per rack. Traditional air-cooled: 5–15 kW. High-density GPU racks: 30–100+ kW. NVIDIA GB200 NVL72: up to 120 kW/rack.</div>
+            <div class="tt-body zh-text">每架平均 IT 功率負載。傳統風冷：5–15 kW。高密度 GPU 機架：30–100+ kW。NVIDIA GB200 NVL72：最高 120 kW/架。</div>
+          <div class="tt-range">✔ AI/GPU rack: 30–120 kW | Standard: 5–15 kW</div>
+          </div>
+          <input type="number" id="rack_power" value="20" min="1" max="200" step="0.5">
+          <div class="unit-hint">kW / rack</div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Cooling Method</span><span class="zh-text">冷卻方式</span></label>
+          <select id="cooling_method">
+            <option value="dlc">Direct Liquid Cooling (DLC)</option>
+            <option value="rdhx">Rear-Door HX (RDHX)</option>
+            <option value="immersion">Immersion Cooling</option>
+            <option value="air">Air Cooling (reference)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Liquid Cooling Coverage (%)</span><span class="zh-text">液冷覆蓋率 (%)</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Liquid Cooling Coverage (%)</div>
+            <div class="tt-title zh-text">液冷覆蓋率 (%)</div>
+            <div class="tt-body en-text">Percentage of rack heat removed by liquid cooling. The remainder is handled by air cooling (CRAC/CRAH). DLC/immersion: 70–100%. RDHX: 50–70%.</div>
+            <div class="tt-body zh-text">液冷移除熱量的百分比，其餘由風冷（CRAC/CRAH）處理。直接液冷/浸沒：70–100%。後門熱交換器：50–70%。</div>
+          <div class="tt-range">✔ DLC/Immersion: 70–100% | RDHX: 50–70%</div>
+          </div>
+          <input type="number" id="lc_coverage" value="70" min="0" max="100">
+          <div class="unit-hint"><span class="en-text">% of heat removed by liquid (rest by air)</span><span class="zh-text">% 由液冷移除的熱量 (其餘由風冷)</span></div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Supply Temp to Rack</span><span class="zh-text">機架供水溫度</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Supply Temp to Rack</div>
+            <div class="tt-title zh-text">機架供水溫度</div>
+            <div class="tt-body en-text">Water temperature supplied to each server rack CDU manifold. Must be below server thermal limits. ASHRAE W1 spec: ≤20°C for standard operation.</div>
+            <div class="tt-body zh-text">供應給每架伺服器 CDU 歧管的水溫。必須低於伺服器熱限制。ASHRAE W1 標準：標準運行 ≤20°C。</div>
+          <div class="tt-range">✔ ASHRAE W1: ≤20°C | W2: ≤25°C</div>
+          </div>
+          <input type="number" id="rack_tin" value="20" min="5" max="40" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Return Temp from Rack</span><span class="zh-text">機架回水溫度</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Return Temp from Rack</div>
+            <div class="tt-title zh-text">機架回水溫度</div>
+            <div class="tt-body en-text">Water temperature returning from server rack. High return temp = good energy recovery potential. Direct-to-chip liquid cooling typically returns 40–55°C.</div>
+            <div class="tt-body zh-text">從伺服器機架回水的溫度。回水溫越高代表廢熱回收潛力越好。晶片直冷液冷典型回水：40–55°C。</div>
+          <div class="tt-formula">ΔT = Tout − Tin</div>
+          <div class="tt-range">✔ D2C typical: 40–55°C</div>
+          </div>
+          <input type="number" id="rack_tout" value="40" min="10" max="70" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="calcRack()">
+          <span class="en-text">▶ CALCULATE RACK</span>
+          <span class="zh-text">▶ 計算機架</span>
+        </button>
+      </div>
+
+      <div id="rack-results" style="display:none;">
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title"><span class="icon">📊</span>
+            <span class="en-text">Rack System Results</span>
+            <span class="zh-text">機架系統結果</span>
+          </div>
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total IT Load</span><span class="zh-text">IT 總負載</span></div>
+              <div class="result-value" id="rk-total">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Liquid Cooling Load</span><span class="zh-text">液冷負載</span></div>
+              <div class="result-value" id="rk-liq">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Air Cooling Load</span><span class="zh-text">風冷負載</span></div>
+              <div class="result-value" id="rk-air">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total Flow Rate</span><span class="zh-text">總流量</span></div>
+              <div class="result-value" id="rk-flow">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Flow per Rack</span><span class="zh-text">每架流量</span></div>
+              <div class="result-value" id="rk-per">—</div>
+              <div class="result-unit">L/min</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">CDUs Required</span><span class="zh-text">所需 CDU 數量</span></div>
+              <div class="result-value" id="rk-cdu">—</div>
+              <div class="result-unit">
+                <span class="en-text">units (100kW each)</span>
+                <span class="zh-text">台 (每台100kW)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">🔧</span>
+            <span class="en-text">Danfoss Products for Rack System</span>
+            <span class="zh-text">機架系統 Danfoss 產品建議</span>
+          </div>
+          <div class="scroll-x">
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+                  <th><span class="en-text">Type</span><span class="zh-text">類型</span></th>
+                  <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+                  <th><span class="en-text">Qty</span><span class="zh-text">數量</span></th>
+                </tr>
+              </thead>
+              <tbody id="rack-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 3: PRODUCT REFERENCE ═══════════════ -->
+  <div id="tab-products" class="tab-panel">
+    <div class="alert info">
+      <span class="en-text">ℹ️ Reference list of Danfoss products applicable to data center liquid cooling infrastructure.</span>
+      <span class="zh-text">ℹ️ 適用於資料中心液冷基礎設施的 Danfoss 產品參考清單。</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- VALVES -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔵</span>
+          <span class="en-text">Control Valves</span><span class="zh-text">控制閥</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Model</span><span class="zh-text">型號</span></th>
+            <th><span class="en-text">Size / Range</span><span class="zh-text">尺寸/範圍</span></th>
+            <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">AB-QM</div><div class="prod-code">Pressure Independent Balancing Control Valve</div></td><td>DN15–DN200</td><td><span class="en-text">CDU primary circuit balancing</span><span class="zh-text">CDU 主迴路平衡</span></td></tr>
+            <tr><td><div class="prod-name">AB-PM</div><div class="prod-code">Pressure Independent 2-port Control Valve</div></td><td>DN15–DN150</td><td><span class="en-text">Server rack flow control</span><span class="zh-text">機架流量控制</span></td></tr>
+            <tr><td><div class="prod-name">VB 2 / VF 2</div><div class="prod-code">2-port Motorized Valve</div></td><td>DN15–DN50</td><td><span class="en-text">On/off CDU isolation</span><span class="zh-text">CDU 隔離開關</span></td></tr>
+            <tr><td><div class="prod-name">AVPB</div><div class="prod-code">Differential Pressure Control Valve</div></td><td>DN15–DN100</td><td><span class="en-text">System ΔP stabilization</span><span class="zh-text">系統差壓穩定</span></td></tr>
+            <tr><td><div class="prod-name">AVQM</div><div class="prod-code">Pressure Independent Control Valve + Actuator</div></td><td>DN15–DN50</td><td><span class="en-text">Rack-level precision control</span><span class="zh-text">機架精密流量控制</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SENSORS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🟢</span>
+          <span class="en-text">Sensors &amp; Transmitters</span><span class="zh-text">感測器 &amp; 變送器</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Model</span><span class="zh-text">型號</span></th>
+            <th><span class="en-text">Range</span><span class="zh-text">量程</span></th>
+            <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">MBT 5250</div><div class="prod-code">Temperature Sensor</div></td><td>-50~150°C</td><td><span class="en-text">Supply/return water temp</span><span class="zh-text">供/回水溫度監控</span></td></tr>
+            <tr><td><div class="prod-name">AKS 33</div><div class="prod-code">Pressure Transmitter</div></td><td>0–25 bar</td><td><span class="en-text">CDU pressure monitoring</span><span class="zh-text">CDU 壓力監控</span></td></tr>
+            <tr><td><div class="prod-name">AKS 4100</div><div class="prod-code">Differential Pressure Transmitter</div></td><td>0–1000 mbar</td><td><span class="en-text">Filter ΔP monitoring</span><span class="zh-text">過濾器壓差監測</span></td></tr>
+            <tr><td><div class="prod-name">MAG 5000/6000</div><div class="prod-code">Electromagnetic Flow Meter</div></td><td>DN15–DN300</td><td><span class="en-text">Water flow measurement</span><span class="zh-text">水流量計量</span></td></tr>
+            <tr><td><div class="prod-name">MC 302/304</div><div class="prod-code">Heat Energy Meter</div></td><td>—</td><td><span class="en-text">CDU energy metering (kWh)</span><span class="zh-text">CDU 能耗計量 (kWh)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DRIVES -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🟡</span>
+          <span class="en-text">Drives &amp; Pumps</span><span class="zh-text">變頻器 &amp; 水泵</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Model</span><span class="zh-text">型號</span></th>
+            <th><span class="en-text">Range</span><span class="zh-text">範圍</span></th>
+            <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">VLT AQUA Drive FC 202</div><div class="prod-code">Variable Frequency Drive</div></td><td>0.25–1400 kW</td><td><span class="en-text">Pump speed control for CDU</span><span class="zh-text">CDU 泵速控制</span></td></tr>
+            <tr><td><div class="prod-name">VLT AutomationDrive FC 302</div><div class="prod-code">Variable Frequency Drive</div></td><td>0.25–1400 kW</td><td><span class="en-text">High-precision cooling pump VFD</span><span class="zh-text">高精度冷卻泵 VFD</span></td></tr>
+            <tr><td><div class="prod-name">VACON 100 FLOW</div><div class="prod-code">Variable Frequency Drive</div></td><td>0.75–250 kW</td><td><span class="en-text">HVAC pump application</span><span class="zh-text">暖通水泵應用</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CONTROLLERS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔴</span>
+          <span class="en-text">Controllers &amp; BMS Integration</span><span class="zh-text">控制器 &amp; BMS 整合</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Model</span><span class="zh-text">型號</span></th>
+            <th>Protocol</th>
+            <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">ECL Comfort 210/310</div><div class="prod-code">Electronic Controller</div></td><td>Modbus / BACnet</td><td><span class="en-text">CDU temperature control</span><span class="zh-text">CDU 溫度控制</span></td></tr>
+            <tr><td><div class="prod-name">AK-SC355</div><div class="prod-code">System Manager</div></td><td>LON / Modbus</td><td><span class="en-text">Central DCIM integration</span><span class="zh-text">中央 DCIM 整合</span></td></tr>
+            <tr><td><div class="prod-name">AK-CC 750</div><div class="prod-code">Pack Controller</div></td><td>Modbus RTU</td><td><span class="en-text">Chiller/cooling plant control</span><span class="zh-text">冷水機組控制</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+  <!-- ═══════════════ TAB 4: REAL-TIME MONITOR ═══════════════ -->
+  <div id="tab-monitor" class="tab-panel">
+
+    <!-- DIGITAL TWIN ARCHITECTURE -->
+    <div class="card-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span class="icon">🔁</span>
+      <span class="en-text">Digital Twin Architecture — Closed Loop</span>
+      <span class="zh-text">Digital Twin 架構 — 閉環控制</span>
+    </div>
+
+    <div class="dt-arch">
+      <div class="dt-layer l1">
+        <div class="dt-layer-num">Layer 1</div>
+        <div class="dt-layer-title">Physical System</div>
+        <ul>
+          <li>Server / GPU Rack</li>
+          <li>CDU Unit</li>
+          <li>Facility Water</li>
+          <li>Pump / Valve</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l2">
+        <div class="dt-layer-num">Layer 2</div>
+        <div class="dt-layer-title">Real-time Data</div>
+        <ul>
+          <li>Temp sensors</li>
+          <li>Flow meters</li>
+          <li>Pressure tx</li>
+          <li>Power meters</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l3">
+        <div class="dt-layer-num">Layer 3</div>
+        <div class="dt-layer-title">Digital Twin Model</div>
+        <ul>
+          <li>Thermal model</li>
+          <li>Flow simulation</li>
+          <li>System state</li>
+          <li>Live sync</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l4">
+        <div class="dt-layer-num">Layer 4</div>
+        <div class="dt-layer-title">AI Optimization</div>
+        <ul>
+          <li>Predict load</li>
+          <li>PUE optimize</li>
+          <li>Failure predict</li>
+          <li>Capacity plan</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l5">
+        <div class="dt-layer-num">Layer 5</div>
+        <div class="dt-layer-title">Control</div>
+        <ul>
+          <li>Valve adjust</li>
+          <li>Pump speed</li>
+          <li>Flow setpoint</li>
+          <li>↩ Feedback</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- LIVE SENSOR CARDS -->
+    <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px;display:flex;align-items:center;gap:10px;">
+      <span class="blink-dot"></span>
+      <span class="en-text">Live Sensor Data — synced from Calculator inputs</span>
+      <span class="zh-text">即時感測器數據 — 與計算機輸入同步</span>
+      <span style="flex:1;height:1px;background:var(--border);"></span>
+      <span id="last-update" style="font-size:11px;color:var(--muted);"></span>
+    </div>
+
+    <div class="monitor-grid" id="sensor-grid">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <!-- CHARTS -->
+    <div class="grid-monitor-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <span class="en-text">🌡️ Temperature Trend</span><span class="zh-text">🌡️ 溫度趨勢</span>
+          <span class="chart-live-badge">LIVE</span>
+        </div>
+        <canvas id="tempChart" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <span class="en-text">💧 Flow Rate Trend</span><span class="zh-text">💧 流量趨勢</span>
+          <span class="chart-live-badge">LIVE</span>
+        </div>
+        <canvas id="flowChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div class="grid-monitor-bottom">
+      <div>
+        <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:10px;">
+          <span class="en-text">System Event Log</span><span class="zh-text">系統事件記錄</span>
+          <span style="flex:1;height:1px;background:var(--border);"></span>
+        </div>
+        <div class="event-log" id="event-log"></div>
+      </div>
+      <div>
+        <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:10px;">
+          <span class="en-text">AI Decision Engine</span><span class="zh-text">AI 決策引擎</span>
+          <span style="flex:1;height:1px;background:var(--border);"></span>
+        </div>
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;flex-direction:column;gap:10px;" id="ai-decisions">
+            <!-- injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+<footer>
+  <div class="danfoss-badge">DANFOSS</div>
+  <p style="margin-top:10px;">
+    <span class="en-text">Data Center Cooling Advisor · For internal and customer reference use · Values are engineering estimates</span>
+    <span class="zh-text">Data Center 散熱顧問工具 · 供內部及客戶參考使用 · 數值為工程估算</span>
+  </p>
+</footer>
+
+<script>
+// ─────────────────────────────────────────
+// LANGUAGE TOGGLE
+// ─────────────────────────────────────────
+function setLang(lang) {
+  document.body.className = 'lang-' + lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// COOLANT PROPERTIES
+// ─────────────────────────────────────────
+const coolantProps = {
+  water:    { cp: 4.182, rho: 998 },
+  glycol25: { cp: 3.8,   rho: 1040 },
+  glycol40: { cp: 3.5,   rho: 1055 }
+};
+
+// ─────────────────────────────────────────
+// CDU CALCULATOR
+// ─────────────────────────────────────────
+function calculate() {
+  const it_power    = parseFloat(document.getElementById('it_power').value);
+  const cdu_count   = parseInt(document.getElementById('cdu_count').value);
+  const pue         = parseFloat(document.getElementById('pue').value);
+  const temp_in     = parseFloat(document.getElementById('temp_in').value);
+  const temp_out    = parseFloat(document.getElementById('temp_out').value);
+  const chw_in      = parseFloat(document.getElementById('chw_in').value);
+  const chw_out     = parseFloat(document.getElementById('chw_out').value);
+  const coolant     = document.getElementById('coolant_type').value;
+
+  const props = coolantProps[coolant];
+  const cp  = props.cp;
+  const rho = props.rho;
+
+  const totalHeat = it_power * cdu_count * pue;  // kW
+  const dt        = temp_out - temp_in;           // °C
+  const massFlow  = (totalHeat * 1000) / (cp * 1000 * dt);  // kg/s
+  const volFlow   = (massFlow / rho) * 3600;      // m³/h
+  const lpm       = volFlow * 1000 / 60;          // L/min
+
+  const chwDt   = chw_out - chw_in;
+  const chwFlow = (totalHeat * 1000) / (4.182 * 1000 * chwDt) * 3600; // m³/h
+
+  // Update results
+  document.getElementById('r-heat').textContent = totalHeat.toFixed(1);
+  document.getElementById('r-dt').textContent   = dt.toFixed(1);
+  document.getElementById('r-mass').textContent = massFlow.toFixed(2);
+  document.getElementById('r-vol').textContent  = volFlow.toFixed(2);
+  document.getElementById('r-lpm').textContent  = lpm.toFixed(1);
+  document.getElementById('r-chw').textContent  = chwFlow.toFixed(2);
+
+  // Alert check
+  const alertBox = document.getElementById('alert-box');
+  if (dt < 5) {
+    alertBox.style.display = 'block';
+    alertBox.className = 'alert';
+    alertBox.innerHTML = '⚠️ ΔT < 5°C — Very high flow rate required. Check pipe sizing and valve Kvs.';
+  } else if (dt > 20) {
+    alertBox.style.display = 'block';
+    alertBox.className = 'alert info';
+    alertBox.innerHTML = 'ℹ️ ΔT > 20°C — High ΔT. Verify server inlet temp limits (ASHRAE W1/W2).';
+  } else {
+    alertBox.style.display = 'block';
+    alertBox.className = 'alert ok';
+    alertBox.innerHTML = '✔ ΔT within normal range. System parameters look valid.';
+  }
+
+  // Product recommendations
+  const products = buildProductList(totalHeat, volFlow, cdu_count);
+  renderProductTable('product-tbody', products);
+
+  document.getElementById('results-panel').classList.add('visible');
+
+  // ── Sync to Real-time Monitor ──
+  syncMonitorFromCDU({
+    temp_in:   temp_in,
+    temp_out:  temp_out,
+    totalHeat: totalHeat,
+    volFlow:   volFlow,
+    lpm:       lpm,
+    chwFlow:   chwFlow,
+    dt:        dt
+  });
+}
+
+// ─────────────────────────────────────────
+// RACK CALCULATOR
+// ─────────────────────────────────────────
+function calcRack() {
+  const racks    = parseInt(document.getElementById('rack_count').value);
+  const rPower   = parseFloat(document.getElementById('rack_power').value);
+  const lcPct    = parseFloat(document.getElementById('lc_coverage').value) / 100;
+  const tin      = parseFloat(document.getElementById('rack_tin').value);
+  const tout     = parseFloat(document.getElementById('rack_tout').value);
+
+  const total    = racks * rPower;        // kW
+  const liqLoad  = total * lcPct;
+  const airLoad  = total * (1 - lcPct);
+  const dt       = tout - tin;
+  const cp = 4.182, rho = 998;
+  const massFlow = (liqLoad * 1000) / (cp * 1000 * dt);
+  const volFlow  = (massFlow / rho) * 3600;
+  const perRack  = liqLoad > 0 ? (volFlow * 1000 / 60 / racks) : 0;
+  const cduNeeded = Math.ceil(liqLoad / 100);
+
+  document.getElementById('rk-total').textContent = total.toFixed(0);
+  document.getElementById('rk-liq').textContent   = liqLoad.toFixed(0);
+  document.getElementById('rk-air').textContent   = airLoad.toFixed(0);
+  document.getElementById('rk-flow').textContent  = volFlow.toFixed(2);
+  document.getElementById('rk-per').textContent   = perRack.toFixed(1);
+  document.getElementById('rk-cdu').textContent   = cduNeeded;
+
+  const rackProducts = buildRackProducts(racks, liqLoad, volFlow, cduNeeded);
+  renderProductTable('rack-tbody', rackProducts);
+
+  document.getElementById('rack-results').style.display = 'block';
+
+  // ── Sync to Real-time Monitor ──
+  syncMonitorFromRack({
+    racks:      racks,
+    rPower:     rPower,
+    total:      total,
+    liqLoad:    liqLoad,
+    volFlow:    volFlow,
+    perRack:    perRack,
+    cduNeeded:  cduNeeded,
+    tin:        tin,
+    tout:       tout
+  });
+}
+
+// ─────────────────────────────────────────
+// PRODUCT LIST BUILDER – CDU
+// ─────────────────────────────────────────
+function buildProductList(totalHeat, volFlow, cduCount) {
+  const products = [];
+
+  // Balancing valve — one per CDU
+  products.push({
+    name: 'AB-QM Pressure Independent Balancing Valve',
+    code: 'AB-QM DN40–DN100',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'Primary circuit balancing per CDU',
+    fn_zh: '每台 CDU 主迴路平衡',
+    qty: cduCount
+  });
+
+  // Control valve
+  products.push({
+    name: 'AB-PM 2-Port Control Valve',
+    code: 'AB-PM + AME series actuator',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'CDU flow modulation control',
+    fn_zh: 'CDU 流量調節控制',
+    qty: cduCount
+  });
+
+  // DP valve
+  products.push({
+    name: 'AVPB Differential Pressure Controller',
+    code: 'AVPB DN25–DN65',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'System ΔP stabilization',
+    fn_zh: '系統差壓穩定',
+    qty: Math.ceil(cduCount / 2)
+  });
+
+  // Flow meter
+  const meterSize = volFlow > 50 ? 'DN100' : volFlow > 20 ? 'DN65' : 'DN40';
+  products.push({
+    name: 'MAG 5000 Electromagnetic Flow Meter',
+    code: `MAG 5000 ${meterSize}`,
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Primary water flow measurement',
+    fn_zh: '主迴路水流量計量',
+    qty: cduCount
+  });
+
+  // Energy meter
+  products.push({
+    name: 'MC 302 Heat Energy Meter',
+    code: 'Kamstrup MC 302',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'CDU cooling energy metering',
+    fn_zh: 'CDU 冷卻能耗計量',
+    qty: cduCount
+  });
+
+  // Temp sensors
+  products.push({
+    name: 'MBT 5250 Temperature Sensor',
+    code: 'MBT 5250 Pt1000',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Supply + return water temp (x2 per CDU)',
+    fn_zh: '供/回水溫度 (每台 CDU x2)',
+    qty: cduCount * 2
+  });
+
+  // Pressure transmitter
+  products.push({
+    name: 'AKS 33 Pressure Transmitter',
+    code: 'AKS 33 0–16 bar',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'CDU inlet/outlet pressure monitoring',
+    fn_zh: 'CDU 進/出口壓力監控',
+    qty: cduCount * 2
+  });
+
+  // VFD
+  const vfdkw = Math.max(2.2, Math.ceil(totalHeat * 0.015));
+  products.push({
+    name: 'VLT AQUA Drive FC 202',
+    code: `FC202 ${vfdkw} kW`,
+    tag: 'drive',
+    tagLabel: 'Drive',
+    fn_en: 'CDU circulation pump VFD control',
+    fn_zh: 'CDU 循環泵變頻控制',
+    qty: cduCount
+  });
+
+  // Controller
+  products.push({
+    name: 'ECL Comfort 310 Electronic Controller',
+    code: 'ECL 310 + ECA 86 Key',
+    tag: 'controller',
+    tagLabel: 'Controller',
+    fn_en: 'CDU temperature + flow control logic',
+    fn_zh: 'CDU 溫度 + 流量控制邏輯',
+    qty: cduCount
+  });
+
+  // AK-SC BMS
+  products.push({
+    name: 'AK-SC355 System Manager',
+    code: 'AK-SC355 + I/O modules',
+    tag: 'controller',
+    tagLabel: 'Controller',
+    fn_en: 'DCIM/BMS central integration',
+    fn_zh: 'DCIM/BMS 中央整合',
+    qty: 1
+  });
+
+  return products;
+}
+
+// ─────────────────────────────────────────
+// PRODUCT LIST BUILDER – RACK
+// ─────────────────────────────────────────
+function buildRackProducts(racks, liqLoad, volFlow, cduNeeded) {
+  const products = [];
+
+  products.push({
+    name: 'AVQM Pressure Independent Control Valve',
+    code: 'AVQM DN15–DN20',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'Per-rack flow control (1 per rack)',
+    fn_zh: '每架流量控制 (每架 1 個)',
+    qty: racks
+  });
+
+  products.push({
+    name: 'AB-PM 2-Port Control Valve + Actuator',
+    code: 'AB-PM + AME 10',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'CDU secondary circuit control',
+    fn_zh: 'CDU 二次迴路控制',
+    qty: cduNeeded
+  });
+
+  products.push({
+    name: 'MBT 5250 Temperature Sensor',
+    code: 'MBT 5250 Pt1000',
+    tag: 'sensor', tagLabel: 'Sensor',
+    fn_en: 'Supply/return per CDU (x2)',
+    fn_zh: '每台 CDU 供/回水溫度 (x2)',
+    qty: cduNeeded * 2
+  });
+
+  products.push({
+    name: 'MAG 5000 Flow Meter',
+    code: 'MAG 5000 DN40',
+    tag: 'sensor', tagLabel: 'Sensor',
+    fn_en: 'CDU total flow measurement',
+    fn_zh: 'CDU 總流量計量',
+    qty: cduNeeded
+  });
+
+  const vfdkw = Math.max(2.2, Math.ceil(liqLoad * 0.015));
+  products.push({
+    name: 'VLT AQUA Drive FC 202',
+    code: `FC202 ${vfdkw} kW`,
+    tag: 'drive', tagLabel: 'Drive',
+    fn_en: 'CDU pump VFD',
+    fn_zh: 'CDU 泵變頻器',
+    qty: cduNeeded
+  });
+
+  products.push({
+    name: 'AVPB Differential Pressure Controller',
+    code: 'AVPB DN25',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'Rack manifold ΔP control',
+    fn_zh: '機架歧管差壓控制',
+    qty: Math.ceil(racks / 10)
+  });
+
+  products.push({
+    name: 'ECL Comfort 310',
+    code: 'ECL 310',
+    tag: 'controller', tagLabel: 'Controller',
+    fn_en: 'CDU control logic',
+    fn_zh: 'CDU 控制邏輯',
+    qty: cduNeeded
+  });
+
+  return products;
+}
+
+// ─────────────────────────────────────────
+// RENDER TABLE
+// ─────────────────────────────────────────
+function renderProductTable(tbodyId, products) {
+  const isZh = document.body.classList.contains('lang-zh');
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-code">${p.code}</div>
+      </td>
+      <td><span class="tag tag-${p.tag}">${p.tagLabel}</span></td>
+      <td style="font-size:13px;color:var(--muted);">
+        <span class="en-text">${p.fn_en}</span>
+        <span class="zh-text">${p.fn_zh}</span>
+      </td>
+      <td><span class="qty-badge">×${p.qty}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Auto-calculate on load
+window.onload = () => { calculate(); };
+
+// ─────────────────────────────────────────
+// REAL-TIME MONITOR
+// ─────────────────────────────────────────
+
+// Dynamic sensor bases — updated by syncMonitorFromCDU / syncMonitorFromRack
+let sensorBases = {
+  'T-S01': { base:20,   range:0.8  },  // supply temp
+  'T-R01': { base:35,   range:1.0  },  // return temp
+  'T-S02': { base:22,   range:0.8  },  // server inlet
+  'T-R02': { base:40,   range:1.2  },  // server outlet
+  'F-M01': { base:18,   range:0.8  },  // CDU flow m³/h
+  'F-M02': { base:22,   range:1.0  },  // facility flow
+  'P-T01': { base:3.5,  range:0.15 },  // CDU inlet pressure
+  'P-T02': { base:1.2,  range:0.1  },  // system ΔP
+  'E-M01': { base:200,  range:8    },  // IT power kW
+  'E-M02': { base:24,   range:1.5  },  // cooling power kW
+  'E-M03': { base:1.12, range:0.01 },  // PUE
+  'T-A01': { base:23,   range:0.5  },  // ambient
+};
+
+function syncMonitorFromCDU(d) {
+  sensorBases['T-S01'].base = d.temp_in;
+  sensorBases['T-R01'].base = d.temp_out;
+  sensorBases['T-S02'].base = d.temp_in + 2;
+  sensorBases['T-R02'].base = d.temp_out - 2;
+  sensorBases['F-M01'].base = parseFloat(d.volFlow.toFixed(1));
+  sensorBases['F-M02'].base = parseFloat(d.chwFlow.toFixed(1));
+  sensorBases['E-M01'].base = parseFloat(d.totalHeat.toFixed(0));
+  // Cooling power ~ 12% of IT load
+  sensorBases['E-M02'].base = parseFloat((d.totalHeat * 0.12).toFixed(1));
+  // PUE derived
+  sensorBases['E-M03'].base = parseFloat((1 + (d.totalHeat * 0.12) / d.totalHeat).toFixed(3));
+  sensorBases['P-T01'].range = 0.2;
+  addSyncLog('CDU Calculator');
+}
+
+function syncMonitorFromRack(d) {
+  sensorBases['T-S01'].base = d.tin;
+  sensorBases['T-R01'].base = d.tout;
+  sensorBases['T-S02'].base = d.tin + 3;
+  sensorBases['T-R02'].base = d.tout - 3;
+  sensorBases['F-M01'].base = parseFloat(d.volFlow.toFixed(1));
+  sensorBases['E-M01'].base = parseFloat(d.total.toFixed(0));
+  sensorBases['E-M02'].base = parseFloat((d.liqLoad * 0.12).toFixed(1));
+  sensorBases['E-M03'].base = parseFloat((1 + (d.liqLoad * 0.12) / Math.max(d.total,1)).toFixed(3));
+  addSyncLog('Rack Calculator');
+}
+
+function addSyncLog(source) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  const now = new Date().toLocaleTimeString('en-GB');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${now}</span>
+    <span class="log-ok">
+      <span class="en-text">🔁 Monitor synced from ${source} — sensor bases updated</span>
+      <span class="zh-text">🔁 監控已從 ${source} 同步 — 感測器基準值已更新</span>
+    </span>`;
+  log.insertBefore(entry, log.firstChild);
+}
+
+const SENSORS = [
+  { id:'T-S01', label_en:'Supply Water Temp', label_zh:'供水溫度',    type:'temp',  unit:'°C',  min:5,  max:60, warn:38, alert:45 },
+  { id:'T-R01', label_en:'Return Water Temp', label_zh:'回水溫度',    type:'temp',  unit:'°C',  min:15, max:70, warn:50, alert:58 },
+  { id:'T-S02', label_en:'Server Inlet Temp', label_zh:'伺服器進水',   type:'temp',  unit:'°C',  min:10, max:55, warn:40, alert:48 },
+  { id:'T-R02', label_en:'Server Outlet Temp',label_zh:'伺服器出水',   type:'temp',  unit:'°C',  min:20, max:70, warn:52, alert:60 },
+  { id:'F-M01', label_en:'CDU Flow Rate',     label_zh:'CDU 流量',    type:'flow',  unit:'m³/h',min:0,  max:200,warn:5,  alert:2 },
+  { id:'F-M02', label_en:'Facility Flow',     label_zh:'設施側流量',   type:'flow',  unit:'m³/h',min:0,  max:200,warn:5,  alert:2 },
+  { id:'P-T01', label_en:'CDU Inlet Pressure',label_zh:'CDU 進口壓力', type:'press', unit:'bar', min:0,  max:10, warn:7,  alert:8.5},
+  { id:'P-T02', label_en:'System ΔP',         label_zh:'系統差壓',    type:'press', unit:'bar', min:0,  max:5,  warn:3,  alert:4 },
+  { id:'E-M01', label_en:'IT Power Load',     label_zh:'IT 功率負載',  type:'power', unit:'kW',  min:0,  max:2000,warn:1800,alert:1950},
+  { id:'E-M02', label_en:'Cooling Power',     label_zh:'冷卻功耗',    type:'power', unit:'kW',  min:0,  max:500,warn:400,alert:460},
+  { id:'E-M03', label_en:'PUE',               label_zh:'PUE 值',     type:'power', unit:'',    min:1,  max:2,  warn:1.4,alert:1.6},
+  { id:'T-A01', label_en:'Ambient Temp',      label_zh:'環境溫度',    type:'temp',  unit:'°C',  min:15, max:40, warn:30, alert:35 },
+];
+
+let sensorValues = {};
+let chartData    = { temps: [], flows: [], labels: [] };
+const MAX_POINTS = 20;
+let tempChart = null, flowChart = null;
+let monitorRunning = false;
+let monitorTimer   = null;
+
+function randNoise(base, range) {
+  return base + (Math.random() - 0.5) * range * 2;
+}
+
+function getSensorVal(s) {
+  const b = sensorBases[s.id];
+  return parseFloat(randNoise(b.base, b.range).toFixed(
+    s.unit === '' ? 3 : s.unit === 'bar' ? 2 : 1
+  ));
+}
+
+function getStatus(s, val) {
+  if (s.warn < s.alert) {
+    if (val >= s.alert) return 'alert';
+    if (val >= s.warn)  return 'warn';
+  } else {
+    if (val <= s.alert) return 'alert';
+    if (val <= s.warn)  return 'warn';
+  }
+  return 'ok';
+}
+
+function buildSensorCards() {
+  const grid = document.getElementById('sensor-grid');
+  if (!grid) return;
+  grid.innerHTML = SENSORS.map(s => `
+    <div class="sensor-card ${s.type}" id="card-${s.id}">
+      <div class="sensor-label">
+        <span class="en-text">${s.label_en}</span>
+        <span class="zh-text">${s.label_zh}</span>
+        <span class="sensor-id">${s.id}</span>
+      </div>
+      <div class="sensor-value status-ok" id="val-${s.id}">—</div>
+      <div class="sensor-unit">${s.unit}</div>
+      <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-${s.id}" style="width:50%"></div></div>
+    </div>
+  `).join('');
+}
+
+function updateSensors() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB');
+  const el = document.getElementById('last-update');
+  if (el) el.textContent = 'Updated: ' + timeStr;
+
+  SENSORS.forEach(s => {
+    const val = getSensorVal(s);
+    sensorValues[s.id] = val;
+    const status = getStatus(s, val);
+
+    const valEl = document.getElementById('val-' + s.id);
+    const barEl = document.getElementById('bar-' + s.id);
+    if (!valEl) return;
+
+    valEl.textContent = val;
+    valEl.className   = 'sensor-value status-' + status;
+
+    // bar fill %
+    const pct = Math.min(100, Math.max(0, ((val - s.min) / (s.max - s.min)) * 100));
+    if (barEl) barEl.style.width = pct + '%';
+  });
+
+  // Chart data
+  const label = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  chartData.labels.push(label);
+  chartData.temps.push(sensorValues['T-S01'] || 20);
+  chartData.flows.push(sensorValues['F-M01'] || 18);
+  if (chartData.labels.length > MAX_POINTS) {
+    chartData.labels.shift(); chartData.temps.shift(); chartData.flows.shift();
+  }
+  updateCharts();
+  updateEventLog(timeStr);
+  updateAIDecisions();
+}
+
+function updateCharts() {
+  if (tempChart) {
+    tempChart.data.labels = [...chartData.labels];
+    tempChart.data.datasets[0].data = [...chartData.temps];
+    tempChart.update('none');
+  }
+  if (flowChart) {
+    flowChart.data.labels = [...chartData.labels];
+    flowChart.data.datasets[0].data = [...chartData.flows];
+    flowChart.update('none');
+  }
+}
+
+function initCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  Chart.defaults.color = '#888';
+  Chart.defaults.borderColor = '#333';
+
+  const tempCtx = document.getElementById('tempChart');
+  const flowCtx = document.getElementById('flowChart');
+  if (!tempCtx || !flowCtx) return;
+
+  const commonOpts = {
+    responsive: true,
+    animation: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#2a2a2a' } },
+      y: { ticks: { font: { size: 10 } }, grid: { color: '#2a2a2a' } }
+    }
+  };
+
+  tempChart = new Chart(tempCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255,107,53,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2
+      }]
+    },
+    options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, min: 10, max: 45, title: { display: true, text: '°C', font:{size:10} } } } }
+  });
+
+  flowChart = new Chart(flowCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [], borderColor: '#0099FF', backgroundColor: 'rgba(0,153,255,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2
+      }]
+    },
+    options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, min: 5, max: 35, title: { display: true, text: 'm³/h', font:{size:10} } } } }
+  });
+}
+
+let logEntries = [];
+const LOG_MSGS = [
+  { status:'ok',   en:'CDU-01 operating within normal parameters',    zh:'CDU-01 運行正常' },
+  { status:'ok',   en:'Flow balanced — ΔP within setpoint',           zh:'流量平衡，差壓正常' },
+  { status:'warn', en:'Supply temp approaching upper limit',           zh:'供水溫度接近上限' },
+  { status:'ok',   en:'PUE nominal — cooling efficiency good',         zh:'PUE 正常，冷卻效率良好' },
+  { status:'ok',   en:'AI model sync complete',                        zh:'AI 模型同步完成' },
+  { status:'warn', en:'IT load increased +8% — adjusting flow',        zh:'IT 負載上升 8%，正在調整流量' },
+  { status:'ok',   en:'Valve position recalibrated by AI',             zh:'AI 已重新校準閥門位置' },
+  { status:'ok',   en:'Digital Twin state updated',                    zh:'Digital Twin 狀態已更新' },
+  { status:'alert',en:'CDU return temp spike detected — monitoring',   zh:'CDU 回水溫度異常，持續監控中' },
+  { status:'ok',   en:'Pump speed adjusted to 72% — energy saving',    zh:'泵速調整至 72%，節能運行' },
+];
+let logIdx = 0;
+
+function updateEventLog(timeStr) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  if (Math.random() > 0.55) return;
+
+  const msg = LOG_MSGS[logIdx % LOG_MSGS.length];
+  logIdx++;
+
+  const isZh = document.body.classList.contains('lang-zh');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${timeStr}</span>
+    <span class="log-${msg.status}">
+      <span class="en-text">${msg.en}</span>
+      <span class="zh-text">${msg.zh}</span>
+    </span>`;
+  log.insertBefore(entry, log.firstChild);
+
+  while (log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+const AI_ACTIONS = [
+  { icon:'🌡️', en:'Reduce supply temp setpoint by 0.5°C',     zh:'供水溫度設定降低 0.5°C',  status:'ok' },
+  { icon:'💧', en:'Increase CDU flow rate by 8%',             zh:'CDU 流量增加 8%',          status:'ok' },
+  { icon:'⚡', en:'Reduce pump speed — load decreasing',      zh:'負載下降，降低泵速',        status:'ok' },
+  { icon:'🔁', en:'Rebalance rack manifold ΔP',               zh:'重新平衡機架歧管差壓',      status:'warn'},
+  { icon:'📊', en:'PUE target 1.10 — cooling optimized',      zh:'PUE 目標 1.10，冷卻已優化', status:'ok' },
+  { icon:'⚠️', en:'Predict thermal event in CDU-02 in 15min', zh:'預測 CDU-02 在 15 分鐘內熱事件', status:'warn'},
+];
+let aiIdx = 0;
+
+function updateAIDecisions() {
+  const box = document.getElementById('ai-decisions');
+  if (!box || Math.random() > 0.3) return;
+
+  const a = AI_ACTIONS[aiIdx % AI_ACTIONS.length];
+  aiIdx++;
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:8px;background:var(--mid);border-radius:3px;animation:fadeIn 0.4s ease;';
+  row.innerHTML = `
+    <span style="font-size:16px;">${a.icon}</span>
+    <div style="flex:1;">
+      <div style="font-size:12px;font-weight:600;color:${a.status==='warn'?'var(--yellow)':'var(--green)'};">
+        <span class="en-text">${a.en}</span>
+        <span class="zh-text">${a.zh}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;" class="en-text">AI Decision Engine · Digital Twin feedback</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;" class="zh-text">AI 決策引擎 · Digital Twin 回饋</div>
+    </div>`;
+  box.insertBefore(row, box.firstChild);
+  while (box.children.length > 4) box.removeChild(box.lastChild);
+}
+
+function startMonitor() {
+  if (monitorRunning) return;
+  monitorRunning = true;
+
+  // Load Chart.js dynamically
+  if (typeof Chart === 'undefined') {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+    sc.onload = () => {
+      initCharts();
+      buildSensorCards();
+      updateSensors();
+      monitorTimer = setInterval(updateSensors, 2000);
+    };
+    document.head.appendChild(sc);
+  } else {
+    initCharts();
+    buildSensorCards();
+    updateSensors();
+    monitorTimer = setInterval(updateSensors, 2000);
+  }
+}
+
+function stopMonitor() {
+  if (monitorTimer) clearInterval(monitorTimer);
+  monitorRunning = false;
+}
+
+// Hook into tab switching
+const _origSwitch = window.switchTab;
+window.switchTab = function(id) {
+  _origSwitch && _origSwitch.call(this, id);
+  if (id === 'monitor') {
+    startMonitor();
+  } else {
+    // keep running in background for live badge effect
+  }
+};
+
+</script>
+</body>
+</html>
