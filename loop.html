@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDU Cooling Loop — Live Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14171A;
+    --paper: #FFFFFF;
+    --panel: #F6F7F8;
+    --line: #E4E6E8;
+    --red: #E2001A;
+    --steel: #33475B;
+    --muted: #6B7280;
+    --cold: #0E7AC4;
+    --warm: #E08A00;
+    --hot: #D63030;
+    --green: #0E9E6E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--panel);
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink);
+    padding: 0;
+  }
+  .loop-widget {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  .loop-widget svg { flex: 1; }
+  .loop-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .loop-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #fff;
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+  svg { display: block; width: 100%; height: auto; }
+  .flow-cold {
+    stroke: var(--cold);
+    stroke-width: 3.5;
+    fill: none;
+    stroke-dasharray: 9 7;
+    animation: flowmove 1.1s linear infinite;
+  }
+  .flow-hot {
+    stroke: var(--hot);
+    stroke-width: 3.5;
+    fill: none;
+    stroke-dasharray: 9 7;
+    animation: flowmove 1.1s linear infinite;
+  }
+  .flow-warm {
+    stroke: var(--warm);
+    stroke-width: 3.5;
+    fill: none;
+    stroke-dasharray: 9 7;
+    animation: flowmove 1.4s linear infinite;
+  }
+  @keyframes flowmove { to { stroke-dashoffset: -16; } }
+  .pipe-bg {
+    stroke: #DDE0E3;
+    stroke-width: 7;
+    fill: none;
+    stroke-linecap: round;
+  }
+  .box {
+    fill: #FFFFFF;
+    stroke: var(--steel);
+    stroke-width: 1.4;
+  }
+  .box-danfoss { stroke: var(--red); stroke-width: 1.6; }
+  .box-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .box-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    fill: var(--muted);
+    text-anchor: middle;
+  }
+  .danfoss-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8.5px;
+    font-weight: 700;
+    fill: var(--red);
+    text-anchor: middle;
+    letter-spacing: 0.3px;
+  }
+  .temp-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .loop-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    fill: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-line { width: 20px; height: 3.5px; border-radius: 2px; }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  @media(max-width:600px){ .metrics { grid-template-columns: 1fr 1fr; } }
+  .metric {
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .metric-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .metric-val { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .m-cold { color: var(--cold); }
+  .m-hot  { color: var(--hot); }
+  .m-flow { color: var(--green); }
+  .m-p    { color: var(--warm); }
+</style>
+</head>
+<body>
+
+<div class="loop-widget">
+  <div class="loop-head">
+    <div class="loop-title">CDU Liquid Cooling Loop — Live Model</div>
+    <div class="live-badge"><span class="live-dot"></span>RUNNING</div>
+  </div>
+
+  <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg">
+
+    <text x="120" y="20" class="loop-name">Facility Loop (Primary)</text>
+    <text x="580" y="20" class="loop-name">Technology Loop (Secondary)</text>
+
+    <path class="pipe-bg" d="M 150 100 L 330 100"/>
+    <path class="pipe-bg" d="M 330 240 L 150 240"/>
+    <path class="pipe-bg" d="M 470 100 L 650 100"/>
+    <path class="pipe-bg" d="M 650 240 L 470 240"/>
+    <path class="pipe-bg" d="M 150 100 L 150 240"/>
+    <path class="pipe-bg" d="M 650 100 L 650 240"/>
+
+    <path class="flow-cold" d="M 150 100 L 330 100"/>
+    <path class="flow-warm" d="M 330 240 L 150 240"/>
+    <path class="flow-cold" d="M 470 100 L 650 100"/>
+    <path class="flow-hot" d="M 650 240 L 470 240"/>
+    <path class="flow-cold" d="M 150 240 L 150 100"/>
+    <path class="flow-hot" d="M 650 100 L 650 240"/>
+
+    <rect class="box" x="60" y="130" width="120" height="80" rx="4"/>
+    <text x="120" y="160" class="box-label">FACILITY</text>
+    <text x="120" y="176" class="box-sub">Chiller / Dry Cooler</text>
+    <text x="120" y="190" class="box-sub">CW Loop 12→18°C</text>
+
+    <rect class="box box-danfoss" x="330" y="80" width="140" height="182" rx="4"/>
+    <text x="400" y="106" class="box-label" fill="#E2001A">CDU</text>
+    <text x="400" y="121" class="box-sub">Liquid-to-Liquid</text>
+
+    <rect x="352" y="132" width="96" height="32" fill="#F6F7F8" stroke="#9AA2AA" stroke-width="1" rx="3"/>
+    <text x="400" y="145" class="box-sub" style="font-size:8.5px;">BPHE Heat Exchanger</text>
+    <line x1="360" y1="154" x2="440" y2="154" stroke="#0E7AC4" stroke-width="1.5"/>
+    <line x1="360" y1="158" x2="440" y2="158" stroke="#D63030" stroke-width="1.5"/>
+
+    <rect x="343" y="174" width="54" height="26" fill="#FDF2F3" stroke="#E2001A" stroke-width="1" rx="3"/>
+    <text x="370" y="185" class="danfoss-tag">AB-QM</text>
+    <text x="370" y="195" class="box-sub" style="font-size:7.5px;">Balancing</text>
+
+    <rect x="403" y="174" width="54" height="26" fill="#FDF2F3" stroke="#E2001A" stroke-width="1" rx="3"/>
+    <text x="430" y="185" class="danfoss-tag">MAG 5000</text>
+    <text x="430" y="195" class="box-sub" style="font-size:7.5px;">Flow Meter</text>
+
+    <rect x="343" y="206" width="54" height="26" fill="#FDF2F3" stroke="#E2001A" stroke-width="1" rx="3"/>
+    <text x="370" y="217" class="danfoss-tag">FC 202</text>
+    <text x="370" y="227" class="box-sub" style="font-size:7.5px;">Pump VFD</text>
+
+    <rect x="403" y="206" width="54" height="26" fill="#FDF2F3" stroke="#E2001A" stroke-width="1" rx="3"/>
+    <text x="430" y="217" class="danfoss-tag">ECL 310</text>
+    <text x="430" y="227" class="box-sub" style="font-size:7.5px;">Controller</text>
+
+    <rect class="box" x="620" y="130" width="130" height="80" rx="4"/>
+    <text x="685" y="158" class="box-label">GPU RACK</text>
+    <text x="685" y="174" class="box-sub">Direct-to-Chip</text>
+    <text x="685" y="188" class="box-sub" id="rack-load-label">45.2 kW load</text>
+    <rect x="620" y="130" width="130" height="80" rx="4" fill="none" stroke="#D63030" stroke-width="1.2" opacity="0.4">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="2s" repeatCount="indefinite"/>
+    </rect>
+
+    <text x="240" y="88" class="temp-label" fill="#0E7AC4" id="t-fac-supply">12.0°C</text>
+    <text x="240" y="262" class="temp-label" fill="#E08A00" id="t-fac-return">18.0°C</text>
+    <text x="560" y="88" class="temp-label" fill="#0E7AC4" id="t-sec-supply">27.4°C</text>
+    <text x="560" y="262" class="temp-label" fill="#D63030" id="t-sec-return">35.8°C</text>
+
+    <polygon points="310,94 322,100 310,106" fill="#0E7AC4"/>
+    <polygon points="170,234 158,240 170,246" fill="#E08A00"/>
+    <polygon points="630,94 642,100 630,106" fill="#0E7AC4"/>
+    <polygon points="490,234 478,240 490,246" fill="#D63030"/>
+
+    <circle cx="240" cy="100" r="5" fill="#FFFFFF" stroke="#0E7AC4" stroke-width="2"/>
+    <circle cx="240" cy="240" r="5" fill="#FFFFFF" stroke="#E08A00" stroke-width="2"/>
+    <circle cx="560" cy="100" r="5" fill="#FFFFFF" stroke="#0E7AC4" stroke-width="2"/>
+    <circle cx="560" cy="240" r="5" fill="#FFFFFF" stroke="#D63030" stroke-width="2"/>
+
+    <text x="400" y="316" class="box-sub" style="font-size:9px;">
+      Two isolated loops — heat transfers across the BPHE. Danfoss components control flow, balance, and temperature.
+    </text>
+  </svg>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-line" style="background:var(--cold)"></div>Cold supply</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--warm)"></div>Facility return</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--hot)"></div>Hot return (rack)</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--red);width:11px;height:11px;border-radius:2px;"></div>Danfoss component</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Supply</div>
+      <div class="metric-val m-cold" id="m-supply">27.4°C</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Return</div>
+      <div class="metric-val m-hot" id="m-return">35.8°C</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Flow</div>
+      <div class="metric-val m-flow" id="m-flow">142 L/min</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ΔP</div>
+      <div class="metric-val m-p" id="m-dp">1.8 bar</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function jitter(base, range, dec = 1) {
+  return (base + (Math.random() - 0.5) * range * 2).toFixed(dec);
+}
+function tick() {
+  const supply = jitter(27.4, 0.5);
+  const ret    = jitter(35.8, 0.7);
+  const flow   = jitter(142, 4, 0);
+  const dp     = jitter(1.8, 0.12, 2);
+  const load   = jitter(45.2, 1.5);
+  document.getElementById('m-supply').textContent = supply + '\u00B0C';
+  document.getElementById('m-return').textContent = ret + '\u00B0C';
+  document.getElementById('m-flow').textContent   = flow + ' L/min';
+  document.getElementById('m-dp').textContent     = dp + ' bar';
+  document.getElementById('t-sec-supply').textContent = supply + '\u00B0C';
+  document.getElementById('t-sec-return').textContent = ret + '\u00B0C';
+  document.getElementById('t-fac-supply').textContent = jitter(12.0, 0.3) + '\u00B0C';
+  document.getElementById('t-fac-return').textContent = jitter(18.0, 0.4) + '\u00B0C';
+  document.getElementById('rack-load-label').textContent = load + ' kW load';
+}
+tick();
+setInterval(tick, 2000);
+</script>
+</body>
+</html>
