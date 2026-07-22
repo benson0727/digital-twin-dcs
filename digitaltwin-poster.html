@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-time Digital Twin — 2-Phase Cooling Systems | DigitalTwin DCS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171A;
+    --paper:#FFFFFF;
+    --panel:#F6F7F8;
+    --panel-2:#EFF1F2;
+    --line:#E4E6E8;
+    --red:#E2001A;
+    --red-dark:#B4001A;
+    --steel:#33475B;
+    --muted:#6B7280;
+    --cold:#0E7AC4;
+    --hot:#D63030;
+    --warm:#E08A00;
+    --green:#0E9E6E;
+    --mono:'IBM Plex Mono', monospace;
+    --disp:'Barlow Condensed', sans-serif;
+    --body:'Barlow', sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+  }
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 32px; }
+
+  /* ══ HEADER ══ */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:24px 0;
+  }
+  .logo{ display:flex; align-items:center; gap:10px; }
+  .logo-mark{
+    width:28px; height:28px; background:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .logo-mark::after{
+    content:''; width:10px; height:10px; background:var(--red);
+    position:absolute;
+  }
+  .logo-text{ font-family:var(--disp); font-weight:700; font-size:17px; letter-spacing:0.5px; }
+  .logo-text b{ color:var(--red); font-weight:800; }
+
+  /* ══ EYEBROW ══ */
+  .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:11px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--muted);
+    margin:8px 0 12px;
+  }
+  .eyebrow .dash{ width:20px; height:2px; background:var(--red); }
+
+  /* ══ HERO ══ */
+  .hero-top{
+    display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px;
+    align-items:start;
+  }
+  h1{
+    font-family:var(--disp); font-weight:800;
+    font-size:clamp(38px,5vw,62px); line-height:0.98; letter-spacing:-0.5px;
+    text-transform:uppercase;
+  }
+  h1 .accent{ color:var(--red); }
+  .hero-sub{
+    font-size:15.5px; line-height:1.7; color:var(--muted);
+    max-width:520px; margin-top:18px;
+  }
+
+  .iso-tag-wrap{ position:relative; }
+  .iso-tag{
+    position:absolute; top:6px; right:24px;
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    letter-spacing:1px; text-transform:uppercase;
+    background:#fff; border:1px solid var(--line);
+    padding:5px 12px; z-index:2;
+  }
+  .iso-tag::after{
+    content:''; position:absolute; left:50%; bottom:-40px;
+    width:1px; height:40px; background:var(--ink);
+  }
+  .iso-img{ width:100%; height:auto; display:block; margin-top:8px; opacity:0.92; }
+
+  /* ══ DIAGRAM SECTION ══ */
+  .diagram-row{
+    display:grid; grid-template-columns:1.55fr 0.9fr; gap:28px;
+    margin-top:36px; align-items:start;
+  }
+
+  .cooling-diagram{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:28px 28px 20px;
+  }
+
+  .pipe-labels{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:6px;
+  }
+  .pipe-label{
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:1.5px; display:flex; align-items:center; gap:6px;
+  }
+  .pipe-label.vapor{ color:var(--hot); }
+  .pipe-label.liquid{ color:var(--cold); }
+  .pipe-label .arrow{ font-size:13px; }
+
+  .product-stage{
+    position:relative;
+    display:grid; grid-template-columns:1fr 1.15fr; gap:0;
+    align-items:end;
+  }
+  .product-stage img{ width:100%; height:auto; display:block; }
+  .cdu-img{ max-width:88%; }
+  .rack-img{ max-width:100%; }
+
+  .comp-tag{
+    position:absolute; font-family:var(--mono); font-size:10.5px;
+    font-weight:700; letter-spacing:1px; background:#fff;
+    padding:2px 8px; border:1px solid var(--line);
+  }
+  .tag-cdu{ top:48%; left:2%; }
+  .tag-rack{ top:6%; right:6%; }
+
+  .legend-row{
+    display:flex; gap:22px; margin-top:14px; flex-wrap:wrap;
+  }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:10.5px; color:var(--muted); }
+  .legend-swatch{ width:22px; height:4px; border-radius:2px; }
+
+  .evap-detail-box{
+    margin-top:16px; display:flex; gap:14px; align-items:center;
+    background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px;
+  }
+  .evap-detail-box img{ width:64px; height:64px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+  .evap-detail-text{ font-family:var(--mono); font-size:10.5px; color:var(--muted); line-height:1.6; }
+  .evap-detail-text b{ color:var(--ink); display:block; font-size:11.5px; letter-spacing:0.5px; margin-bottom:2px; }
+
+  /* ══ KPI PANEL ══ */
+  .kpi-panel{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:18px 20px;
+  }
+  .kpi-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .kpi-title{
+    display:flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:1.5px; text-transform:uppercase; color:var(--steel);
+  }
+  .kpi-title .dash{ width:14px; height:2px; background:var(--red); }
+  .live-pill{
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:10px; font-weight:700;
+    color:var(--red); letter-spacing:1px;
+  }
+  .live-dot{ width:6px; height:6px; border-radius:50%; background:var(--red); animation:blink 1.2s infinite; }
+  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .kpi-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid var(--line);
+  }
+  .kpi-row:last-of-type{ border-bottom:none; }
+  .kpi-left{ display:flex; align-items:center; gap:10px; }
+  .kpi-icon{ font-size:15px; }
+  .kpi-label{ font-family:var(--mono); font-size:10.5px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); }
+  .kpi-val{ font-family:var(--disp); font-weight:700; font-size:19px; }
+  .kv-supply{ color:var(--hot); }
+  .kv-return{ color:var(--cold); }
+  .kv-flow{ color:var(--green); }
+  .kv-dp{ color:var(--warm); }
+  .kv-status{ color:var(--green); font-family:var(--mono); font-size:13px; letter-spacing:1px; }
+
+  .chart-box{ margin-top:14px; }
+  .chart-title{
+    font-family:var(--mono); font-size:9.5px; letter-spacing:1px;
+    text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+    display:flex; justify-content:space-between;
+  }
+  .chart-legend{ display:flex; gap:12px; }
+  .chart-legend span{ display:flex; align-items:center; gap:4px; }
+  .cl-dot{ width:8px; height:8px; border-radius:50%; }
+  svg.chart{ width:100%; height:110px; display:block; }
+
+  /* ══ PROCESS FLOW ══ */
+  .process-flow{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:44px; padding:26px 0; border-top:1px solid var(--line);
+    flex-wrap:wrap; gap:10px;
+  }
+  .pf-step{ display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; min-width:90px; }
+  .pf-icon{
+    width:52px; height:52px; border:1.5px solid var(--ink); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+    background:#fff;
+  }
+  .pf-label{ font-family:var(--mono); font-size:9px; letter-spacing:0.5px; text-transform:uppercase; text-align:center; color:var(--muted); line-height:1.4; }
+  .pf-arrow{ font-size:18px; color:var(--line); flex-shrink:0; }
+
+  /* ══ FEATURE COLUMNS ══ */
+  .features{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:32px;
+    margin-top:8px; padding-bottom:36px;
+  }
+  .feature{ display:flex; gap:14px; }
+  .feature-icon{
+    width:44px; height:44px; border:1.5px solid var(--red); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-size:18px; color:var(--red);
+  }
+  .feature h3{ font-family:var(--disp); font-weight:700; font-size:15px; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; }
+  .feature p{ font-size:12.5px; line-height:1.6; color:var(--muted); }
+
+  /* ══ FOOTER BAR ══ */
+  .footer-bar{
+    border-top:2px solid var(--ink);
+    padding:18px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px;
+  }
+  .footer-left{ display:flex; align-items:center; gap:10px; }
+  .footer-left .bar{ width:3px; height:16px; background:var(--red); }
+  .footer-left span{ font-family:var(--disp); font-weight:700; font-size:13px; letter-spacing:1px; text-transform:uppercase; }
+  .footer-right{ display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
+
+  @media(max-width:900px){
+    .hero-top, .diagram-row, .product-stage{ grid-template-columns:1fr; }
+    .features{ grid-template-columns:1fr; }
+    .process-flow{ overflow-x:auto; justify-content:flex-start; }
+  }
+
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 0; border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  .nav-links{ display:flex; gap:26px; font-family:var(--mono); font-size:12px; letter-spacing:0.5px; }
+  .nav-links a{ color:var(--muted); text-decoration:none; text-transform:uppercase; }
+  .nav-links a:hover{ color:var(--red); }
+  .nav-links a.active{ color:var(--ink); font-weight:700; }
+  @media(max-width:820px){ .nav-links{ display:none; } }
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text">DIGITAL<b>TWIN</b> · DCS</div>
+    </div>
+  </header>
+  <nav>
+    <div class="nav-links">
+      <a href="digitaltwin-poster.html" class="active">Overview</a>
+      <a href="index.html">Platform Home</a>
+      <a href="loop.html">Cooling Loop</a>
+      <a href="platform.html">Open Platform</a>
+    </div>
+  </nav>
+
+  <!-- EYEBROW -->
+  <div class="eyebrow"><span class="dash"></span>Real-time Digital Twin — 2-Phase Cooling Systems</div>
+
+  <!-- HERO TOP: headline + isometric -->
+  <div class="hero-top">
+    <div>
+      <h1>Static audits<br>miss what a live<br><span class="accent">Digital Twin</span><br>reveals.</h1>
+      <p class="hero-sub">
+        Monitor rack load, refrigerant flow, pressure drop, supply and return
+        temperatures, and system performance in real time. A live digital twin
+        helps engineers optimize 2-phase cooling, reduce risk, and improve
+        energy efficiency before deployment and during operation.
+      </p>
+    </div>
+    <div class="iso-tag-wrap">
+      <div class="iso-tag">Digital Model</div>
+      <img class="iso-img" src="assets/dc-isometric.png" alt="Data center isometric model">
+    </div>
+  </div>
+
+  <!-- DIAGRAM ROW: product photos + KPI panel -->
+  <div class="diagram-row">
+
+    <div class="cooling-diagram">
+      <div class="pipe-labels">
+        <div class="pipe-label vapor">VAPOR RETURN <span class="arrow">→</span></div>
+        <div class="pipe-label liquid">LIQUID LINE <span class="arrow">→</span></div>
+      </div>
+
+      <div class="product-stage">
+        <img class="cdu-img" src="assets/cdu-unit.png" alt="CDU unit">
+        <img class="rack-img" src="assets/server-rack.png" alt="Server rack with liquid cooling">
+        <div class="comp-tag tag-cdu">CDU</div>
+        <div class="comp-tag tag-rack">RACK</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--cold)"></div>Liquid (High Pressure)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--hot)"></div>Vapor (Low Pressure)</div>
+      </div>
+
+      <div class="evap-detail-box">
+        <img src="assets/evaporator-detail.png" alt="2-phase evaporator detail">
+        <div class="evap-detail-text">
+          <b>2-Phase Evaporator</b>
+          Cold plate connection point — refrigerant transitions from
+          liquid to vapor as it absorbs heat directly at the chip level.
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI PANEL -->
+    <div class="kpi-panel">
+      <div class="kpi-head">
+        <div class="kpi-title"><span class="dash"></span>Real-Time KPIs</div>
+        <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-left"><span class="kpi-icon">🌡️</span><span class="kpi-label">Supply Temp.</span></div>
+        <div class="kpi-val kv-supply" id="k-supply">22.4 °C</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-left"><span class="kpi-icon">🌡️</span><span class="kpi-label">Return Temp.</span></div>
+        <div class="kpi-val kv-return" id="k-return">29.7 °C</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-left"><span class="kpi-icon">〰️</span><span class="kpi-label">Refrigerant Flow</span></div>
+        <div class="kpi-val kv-flow" id="k-flow">186 L/min</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-left"><span class="kpi-icon">📉</span><span class="kpi-label">Pressure Drop</span></div>
+        <div class="kpi-val kv-dp" id="k-dp">0.42 bar</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-left"><span class="kpi-icon">📦</span><span class="kpi-label">Model Status</span></div>
+        <div class="kpi-val kv-status">RUNNING</div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">
+          <span>Supply &amp; Return Temperature (°C)</span>
+        </div>
+        <div class="chart-legend" style="margin-bottom:6px;">
+          <span><span class="cl-dot" style="background:var(--cold)"></span>Supply</span>
+          <span><span class="cl-dot" style="background:var(--hot)"></span>Return</span>
+        </div>
+        <svg class="chart" id="tempChart" viewBox="0 0 400 110"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESS FLOW -->
+  <div class="process-flow">
+    <div class="pf-step"><div class="pf-icon">🌬️</div><div class="pf-label">Dry Cooler /<br>Condenser</div></div>
+    <div class="pf-arrow">→</div>
+    <div class="pf-step"><div class="pf-icon">🧪</div><div class="pf-label">Receiver</div></div>
+    <div class="pf-arrow">→</div>
+    <div class="pf-step"><div class="pf-icon">⚙️</div><div class="pf-label">Pump /<br>Compressor</div></div>
+    <div class="pf-arrow">→</div>
+    <div class="pf-step"><div class="pf-icon">🗄️</div><div class="pf-label">CDU</div></div>
+    <div class="pf-arrow">→</div>
+    <div class="pf-step"><div class="pf-icon">🖥️</div><div class="pf-label">Rack /<br>Evaporator</div></div>
+    <div class="pf-arrow">→</div>
+    <div class="pf-step"><div class="pf-icon">📊</div><div class="pf-label">Report</div></div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">⏱</div>
+      <div>
+        <h3>Real-Time Simulation</h3>
+        <p>Live digital twin mirrors system behavior to monitor performance and detect issues early.</p>
+      </div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">◎</div>
+      <div>
+        <h3>2-Phase Cooling Optimization</h3>
+        <p>Understand refrigerant dynamics, balance load, and optimize efficiency across all operating conditions.</p>
+      </div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div>
+        <h3>Faster Design Decisions</h3>
+        <p>Validate options virtually, compare scenarios, and deploy with confidence — faster and with less risk.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER BAR -->
+  <div class="footer-bar">
+    <div class="footer-left">
+      <div class="bar"></div>
+      <span>See more. Optimize more. Deploy with confidence.</span>
+    </div>
+    <div class="footer-right">🖥 Monitor. Optimize. Perform.</div>
+  </div>
+
+</div>
+
+<script>
+// ── Live KPI simulation ──
+function jitter(base, range, dec=1){ return (base + (Math.random()-0.5)*range*2).toFixed(dec); }
+
+let history = { supply:[], ret:[] };
+const N = 14;
+for(let i=0;i<N;i++){ history.supply.push(22.4); history.ret.push(29.7); }
+
+function renderChart(){
+  const svg = document.getElementById('tempChart');
+  const w=400,h=110,pad=6;
+  const minV=15,maxV=36;
+  const stepX = (w-2*pad)/(N-1);
+  const toY = v => h-pad - ((v-minV)/(maxV-minV))*(h-2*pad);
+
+  const supplyPts = history.supply.map((v,i)=>`${pad+i*stepX},${toY(v)}`).join(' ');
+  const retPts    = history.ret.map((v,i)=>`${pad+i*stepX},${toY(v)}`).join(' ');
+
+  svg.innerHTML = `
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#E4E6E8" stroke-width="1"/>
+    <polyline points="${retPts}" fill="none" stroke="#D63030" stroke-width="2"/>
+    <polyline points="${supplyPts}" fill="none" stroke="#0E7AC4" stroke-width="2"/>
+  `;
+}
+
+function tick(){
+  const supply = parseFloat(jitter(22.4, 0.8));
+  const ret    = parseFloat(jitter(29.7, 0.9));
+  const flow   = jitter(186, 5, 0);
+  const dp     = jitter(0.42, 0.04, 2);
+
+  document.getElementById('k-supply').textContent = supply.toFixed(1) + ' °C';
+  document.getElementById('k-return').textContent = ret.toFixed(1) + ' °C';
+  document.getElementById('k-flow').textContent   = flow + ' L/min';
+  document.getElementById('k-dp').textContent     = dp + ' bar';
+
+  history.supply.push(supply); history.supply.shift();
+  history.ret.push(ret); history.ret.shift();
+  renderChart();
+}
+
+renderChart();
+tick();
+setInterval(tick, 2200);
+</script>
+</body>
+</html>
